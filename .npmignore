@@ -2,6 +2,7 @@
 .eslintrc.js
 .github/
 .idea/
+.release-it.js
 jest.config.js
 src/
 tests/

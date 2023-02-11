@@ -1,12 +1,17 @@
-import Version from './version';
 import {
   EmptySegmentError,
+  ExcessiveComparatorsError,
+  ExpectedCommaFoundError,
   LeadingZeroError,
   Position,
+  UnexpectedAfterWildcardError,
   UnexpectedChar,
   UnexpectedCharAfterError,
   UnexpectedEndError,
+  WildcardNotTheOnlyComparatorError,
 } from './error';
+import Version from './version';
+import VersionReq, { Comparator, Op } from './version_req';
 
 export function parse_version(text: string): Version {
   let major: number, minor: number, patch: number;
@@ -55,82 +60,37 @@ export function parse_version(text: string): Version {
   return new Version(major, minor, patch, pre, build);
 }
 
-// impl FromStr for VersionReq {
-//     type Err = Error;
-//
-//     fn from_str(text: &str) -> Result<Self, Self::Err> {
-//         let text = text.trim_start_matches(' ');
-//         if let Some((ch, text)) = wildcard(text) {
-//             let rest = text.trim_start_matches(' ');
-//             if rest.is_empty() {
-//                 #[cfg(not(no_const_vec_new))]
-//                 return Ok(VersionReq::STAR);
-//                 #[cfg(no_const_vec_new)] // rustc <1.39
-//                 return Ok(VersionReq {
-//                     comparators: Vec::new(),
-//                 });
-//             } else if rest.starts_with(',') {
-//                 return Err(Error::new(ErrorKind::WildcardNotTheOnlyComparator(ch)));
-//             } else {
-//                 return Err(Error::new(ErrorKind::UnexpectedAfterWildcard));
-//             }
-//         }
-//
-//         let depth = 0;
-//         let mut comparators = Vec::new();
-//         let len = version_req(text, &mut comparators, depth)?;
-//         unsafe { comparators.set_len(len) }
-//         Ok(VersionReq { comparators })
-//     }
-// }
-//
-// impl FromStr for Comparator {
-//     type Err = Error;
-//
-//     fn from_str(text: &str) -> Result<Self, Self::Err> {
-//         let text = text.trim_start_matches(' ');
-//         let (comparator, pos, rest) = comparator(text)?;
-//         if !rest.is_empty() {
-//             let unexpected = rest.chars().next().unwrap();
-//             return Err(Error::new(ErrorKind::UnexpectedCharAfter(pos, unexpected)));
-//         }
-//         Ok(comparator)
-//     }
-// }
-//
-// impl FromStr for Prerelease {
-//     type Err = Error;
-//
-//     fn from_str(text: &str) -> Result<Self, Self::Err> {
-//         let (pre, rest) = prerelease_identifier(text)?;
-//         if !rest.is_empty() {
-//             return Err(Error::new(ErrorKind::IllegalCharacter(Position.Pre)));
-//         }
-//         Ok(pre)
-//     }
-// }
-//
-// impl FromStr for BuildMetadata {
-//     type Err = Error;
-//
-//     fn from_str(text: &str) -> Result<Self, Self::Err> {
-//         let (build, rest) = build_identifier(text)?;
-//         if !rest.is_empty() {
-//             return Err(Error::new(ErrorKind::IllegalCharacter(Position.Build)));
-//         }
-//         Ok(build)
-//     }
-// }
-//
-// impl Error {
-//     fn new(kind: ErrorKind) -> Self {
-//         Error { kind }
-//     }
-// }
-//
-// impl Op {
-//     const DEFAULT: Self = Op::Caret;
-// }
+export function parse_version_req(text: string): VersionReq {
+  text = text.replace(/^ +/, '');
+
+  const wc = wildcard(text);
+  if (wc) {
+    const rest = wc[1].replace(/^ +/, '');
+    if (rest === '') {
+      return VersionReq.STAR;
+    } else if (rest[0] === ',') {
+      throw new WildcardNotTheOnlyComparatorError(wc[0]);
+    } else {
+      throw new UnexpectedAfterWildcardError();
+    }
+  }
+
+  const depth = 0;
+  const comparators = [];
+  version_req(text, comparators, depth);
+  return new VersionReq(comparators);
+}
+
+export function parse_comparator(text: string): Comparator {
+  text = text.replace(/^ +/, '');
+
+  const [comp, pos, rest] = comparator(text);
+  if (rest !== '') {
+    throw new UnexpectedCharAfterError(pos, rest[0]);
+  }
+
+  return comp;
+}
 
 function numeric_identifier(input: string, pos: Position): [number, string] {
   const ZERO = '0'.charCodeAt(0);
@@ -160,17 +120,12 @@ function numeric_identifier(input: string, pos: Position): [number, string] {
   }
 }
 
-// fn wildcard(input: &str) -> Option<(char, &str)> {
-//     if let Some(rest) = input.strip_prefix('*') {
-//         Some(('*', rest))
-//     } else if let Some(rest) = input.strip_prefix('x') {
-//         Some(('x', rest))
-//     } else if let Some(rest) = input.strip_prefix('X') {
-//         Some(('X', rest))
-//     } else {
-//         None
-//     }
-// }
+function wildcard(input: string): [string, string] | null {
+  const next = input[0];
+  return next === '*' || next === 'x' || next === 'X'
+    ? [next, input.slice(1)]
+    : null;
+}
 
 function dot(input: string, pos: Position): string {
   const next = input[0];
@@ -228,146 +183,139 @@ function identifier(input: string, pos: Position): [string, string] {
   }
 }
 
-// fn op(input: &str) -> (Op, &str) {
-//     let bytes = input.as_bytes();
-//     if bytes.first() == Some(&b'=') {
-//         (Op::Exact, &input[1..])
-//     } else if bytes.first() == Some(&b'>') {
-//         if bytes.get(1) == Some(&b'=') {
-//             (Op::GreaterEq, &input[2..])
-//         } else {
-//             (Op::Greater, &input[1..])
-//         }
-//     } else if bytes.first() == Some(&b'<') {
-//         if bytes.get(1) == Some(&b'=') {
-//             (Op::LessEq, &input[2..])
-//         } else {
-//             (Op::Less, &input[1..])
-//         }
-//     } else if bytes.first() == Some(&b'~') {
-//         (Op::Tilde, &input[1..])
-//     } else if bytes.first() == Some(&b'^') {
-//         (Op::Caret, &input[1..])
-//     } else {
-//         (Op::DEFAULT, input)
-//     }
-// }
-//
-// fn comparator(input: &str) -> Result<(Comparator, Position, &str), Error> {
-//     let (mut op, text) = op(input);
-//     let default_op = input.len() == text.len();
-//     let text = text.trim_start_matches(' ');
-//
-//     let mut pos = Position.Major;
-//     let (major, text) = numeric_identifier(text, pos)?;
-//     let mut has_wildcard = false;
-//
-//     let (minor, text) = if let Some(text) = text.strip_prefix('.') {
-//         pos = Position.Minor;
-//         if let Some((_, text)) = wildcard(text) {
-//             has_wildcard = true;
-//             if default_op {
-//                 op = Op::Wildcard;
-//             }
-//             (None, text)
-//         } else {
-//             let (minor, text) = numeric_identifier(text, pos)?;
-//             (Some(minor), text)
-//         }
-//     } else {
-//         (None, text)
-//     };
-//
-//     let (patch, text) = if let Some(text) = text.strip_prefix('.') {
-//         pos = Position.Patch;
-//         if let Some((_, text)) = wildcard(text) {
-//             if default_op {
-//                 op = Op::Wildcard;
-//             }
-//             (None, text)
-//         } else if has_wildcard {
-//             return Err(Error::new(ErrorKind::UnexpectedAfterWildcard));
-//         } else {
-//             let (patch, text) = numeric_identifier(text, pos)?;
-//             (Some(patch), text)
-//         }
-//     } else {
-//         (None, text)
-//     };
-//
-//     let (pre, text) = if patch.is_some() && text.starts_with('-') {
-//         pos = Position.Pre;
-//         let text = &text[1..];
-//         let (pre, text) = prerelease_identifier(text)?;
-//         if pre.is_empty() {
-//             return Err(Error::new(ErrorKind::EmptySegment(pos)));
-//         }
-//         (pre, text)
-//     } else {
-//         (Prerelease::EMPTY, text)
-//     };
-//
-//     let text = if patch.is_some() && text.starts_with('+') {
-//         pos = Position.Build;
-//         let text = &text[1..];
-//         let (build, text) = build_identifier(text)?;
-//         if build.is_empty() {
-//             return Err(Error::new(ErrorKind::EmptySegment(pos)));
-//         }
-//         text
-//     } else {
-//         text
-//     };
-//
-//     let text = text.trim_start_matches(' ');
-//
-//     let comparator = Comparator {
-//         op,
-//         major,
-//         minor,
-//         patch,
-//         pre,
-//     };
-//
-//     Ok((comparator, pos, text))
-// }
-//
-// fn version_req(input: &str, out: &mut Vec<Comparator>, depth: usize) -> Result<usize, Error> {
-//     let (comparator, pos, text) = match comparator(input) {
-//         Ok(success) => success,
-//         Err(mut error) => {
-//             if let Some((ch, mut rest)) = wildcard(input) {
-//                 rest = rest.trim_start_matches(' ');
-//                 if rest.is_empty() || rest.starts_with(',') {
-//                     error.kind = ErrorKind::WildcardNotTheOnlyComparator(ch);
-//                 }
-//             }
-//             return Err(error);
-//         }
-//     };
-//
-//     if text.is_empty() {
-//         out.reserve_exact(depth + 1);
-//         unsafe { out.as_mut_ptr().add(depth).write(comparator) }
-//         return Ok(depth + 1);
-//     }
-//
-//     let text = if let Some(text) = text.strip_prefix(',') {
-//         text.trim_start_matches(' ')
-//     } else {
-//         let unexpected = text.chars().next().unwrap();
-//         return Err(Error::new(ErrorKind::ExpectedCommaFound(pos, unexpected)));
-//     };
-//
-//     const MAX_COMPARATORS: usize = 32;
-//     if depth + 1 == MAX_COMPARATORS {
-//         return Err(Error::new(ErrorKind::ExcessiveComparators));
-//     }
-//
-//     // Recurse to collect parsed Comparator objects on the stack. We perform a
-//     // single allocation to allocate exactly the right sized Vec only once the
-//     // total number of comparators is known.
-//     let len = version_req(text, out, depth + 1)?;
-//     unsafe { out.as_mut_ptr().add(depth).write(comparator) }
-//     Ok(len)
-// }
+function op_(input: string): [Op, string] {
+  const ch1 = input[0];
+  const ch2 = input[1];
+  if (ch1 === '=') {
+    return ['Exact', input.slice(1)];
+  } else if (ch1 === '>') {
+    if (ch2 === '=') {
+      return ['GreaterEq', input.slice(2)];
+    } else {
+      return ['Greater', input.slice(1)];
+    }
+  } else if (ch1 === '<') {
+    if (ch2 === '=') {
+      return ['LessEq', input.slice(2)];
+    } else {
+      return ['Less', input.slice(1)];
+    }
+  } else if (ch1 === '~') {
+    return ['Tilde', input.slice(1)];
+  } else if (ch1 === '^') {
+    return ['Caret', input.slice(1)];
+  } else {
+    return ['Caret', input];
+  }
+}
+
+function comparator(input: string): [Comparator, Position, string] {
+  let [op, text] = op_(input);
+  const isDefaultOp = input.length == text.length;
+
+  text = text.replace(/^ +/, '');
+
+  let major: number;
+  let pos = Position.Major;
+  // eslint-disable-next-line prefer-const
+  [major, text] = numeric_identifier(text, pos);
+  let hasWildcard = false;
+
+  let minor = null;
+  if (text[0] === '.') {
+    text = text.slice(1);
+    pos = Position.Minor;
+
+    const wc = wildcard(text);
+    if (wc) {
+      hasWildcard = true;
+      if (isDefaultOp) {
+        op = 'Wildcard';
+      }
+      text = wc[1];
+    } else {
+      [minor, text] = numeric_identifier(text, pos);
+    }
+  }
+
+  let patch = null;
+  if (text[0] === '.') {
+    text = text.slice(1);
+    pos = Position.Patch;
+
+    const wc = wildcard(text);
+    if (wc) {
+      if (isDefaultOp) {
+        op = 'Wildcard';
+      }
+      text = wc[1];
+    } else if (hasWildcard) {
+      throw new UnexpectedAfterWildcardError();
+    } else {
+      [patch, text] = numeric_identifier(text, pos);
+    }
+  }
+
+  let pre = '';
+  if (patch !== null && text[0] === '-') {
+    pos = Position.Pre;
+    text = text.slice(1);
+    [pre, text] = identifier(text, pos);
+    if (pre === '') {
+      throw new EmptySegmentError(pos);
+    }
+  }
+
+  let build = '';
+  if (patch !== null && text[0] === '+') {
+    pos = Position.Build;
+    text = text.slice(1);
+    [build, text] = identifier(text, pos);
+    if (build === '') {
+      throw new EmptySegmentError(pos);
+    }
+  }
+
+  text = text.replace(/^ +/, '');
+
+  const comparator = new Comparator(op, major, minor, patch, pre);
+  return [comparator, pos, text];
+}
+
+function version_req(input: string, out: Comparator[], depth: number): number {
+  let comp, pos, text;
+  try {
+    [comp, pos, text] = comparator(input);
+  } catch (error) {
+    const wc = wildcard(input);
+    if (wc) {
+      const rest = wc[1].replace(/^ +/, '');
+      if (rest === '' || rest[0] === ',') {
+        throw new WildcardNotTheOnlyComparatorError(wc[0]);
+      }
+    }
+
+    throw error;
+  }
+
+  if (text === '') {
+    out.push(comp);
+    return depth + 1;
+  }
+
+  if (text[0] !== ',') {
+    const unexpected = text[0];
+    throw new ExpectedCommaFoundError(pos, unexpected);
+  }
+
+  text = text.replace(/^, */, '');
+
+  const MAX_COMPARATORS = 32;
+  if (depth + 1 == MAX_COMPARATORS) {
+    throw new ExcessiveComparatorsError();
+  }
+
+  out.push(comp);
+
+  return version_req(text, out, depth + 1);
+}

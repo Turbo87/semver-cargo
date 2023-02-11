@@ -1,5 +1,6 @@
 import { parse_version } from './parse';
 import { compareBuild, comparePre } from './order';
+import { format_version } from './display';
 
 /**
  * **SemVer version** as defined by <https://semver.org>.
@@ -103,14 +104,7 @@ export default class Version {
   }
 
   toString(): string {
-    let output = `${this.major}.${this.minor}.${this.patch}`;
-    if (this.pre) {
-      output += `-${this.pre}`;
-    }
-    if (this.build) {
-      output += `+${this.build}`;
-    }
-    return output;
+    return format_version(this);
   }
 
   compare(other: Version): number {

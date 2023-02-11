@@ -1,7 +1,8 @@
 {
   "name": "semver-cargo-js",
   "version": "0.0.0",
-  "description": "",
+  "description": "Parser and evaluator for Cargo's flavor of Semantic Versioning",
+  "repository": "https://github.com/Turbo87/semver-cargo",
   "source": "src/lib.ts",
   "main": "dist/semver.cjs",
   "module": "dist/semver.mjs",
@@ -12,7 +13,7 @@
     "test": "jest",
     "watch": "parcel watch"
   },
-  "keywords": [],
+  "keywords": ["semver", "rust", "cargo", "crates.io"],
   "author": "Tobias Bieniek <tobias@bieniek.cloud>",
   "license": "ISC",
   "devDependencies": {

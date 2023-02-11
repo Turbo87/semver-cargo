@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.1.4 (2023-02-11)
+
+- CI: Add missing `registry-url` option to deploy script
+
+
 ## v0.1.3 (2023-02-11)
 
 - CI: Use `npm` for publishing

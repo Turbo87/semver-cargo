@@ -1,103 +1,50 @@
 name: CI
 
 on:
-  push:
   pull_request:
-  schedule: [cron: "40 1 * * *"]
+  push:
+    branches:
+      - main
 
-permissions:
-  contents: read
+concurrency:
+  group: ci-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
 
 env:
-  RUSTFLAGS: -Dwarnings
+  # renovate: datasource=npm depName=pnpm
+  PNPM_VERSION: 7.27.0
 
 jobs:
-  pre_ci:
-    uses: dtolnay/.github/.github/workflows/pre_ci.yml@master
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3.3.0
+
+      - uses: pnpm/action-setup@v2.2.4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v3.6.0
+        with:
+          node-version: 14.x
+          cache: pnpm
+
+      - run: pnpm install
+      - run: pnpm lint
 
   test:
-    name: Rust ${{matrix.rust}}
-    needs: pre_ci
-    if: needs.pre_ci.outputs.continue
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        rust: [nightly, beta, stable, 1.52.0, 1.46.0, 1.40.0, 1.39.0, 1.36.0, 1.33.0, 1.32.0, 1.31.0]
-    timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v3
-      - uses: dtolnay/rust-toolchain@master
+      - uses: actions/checkout@v3.3.0
+
+      - uses: pnpm/action-setup@v2.2.4
         with:
-          toolchain: ${{matrix.rust}}
-      - run: cargo test
-      - run: cargo check --no-default-features
-      - run: cargo check --features serde
-      - run: cargo check --no-default-features --features serde
+          version: ${{ env.PNPM_VERSION }}
 
-  node:
-    name: Node
-    needs: pre_ci
-    if: needs.pre_ci.outputs.continue
-    runs-on: ubuntu-latest
-    timeout-minutes: 45
-    steps:
-      - uses: actions/checkout@v3
-      - uses: dtolnay/rust-toolchain@stable
-      - run: npm install semver
-      - run: cargo test
-        env:
-          RUSTFLAGS: --cfg test_node_semver ${{env.RUSTFLAGS}}
+      - uses: actions/setup-node@v3.6.0
+        with:
+          node-version: 14.x
+          cache: pnpm
 
-  clippy:
-    name: Clippy
-    runs-on: ubuntu-latest
-    if: github.event_name != 'pull_request'
-    timeout-minutes: 45
-    steps:
-      - uses: actions/checkout@v3
-      - uses: dtolnay/rust-toolchain@clippy
-      - run: cargo clippy --tests --benches -- -Dclippy::all -Dclippy::pedantic
-
-  miri:
-    name: Miri
-    needs: pre_ci
-    if: needs.pre_ci.outputs.continue
-    runs-on: ubuntu-latest
-    env:
-      MIRIFLAGS: -Zmiri-strict-provenance
-    timeout-minutes: 45
-    steps:
-      - uses: actions/checkout@v3
-      - uses: dtolnay/rust-toolchain@miri
-      - name: Run cargo miri test (64-bit little endian)
-        run: cargo miri test --target x86_64-unknown-linux-gnu
-      - name: Run cargo miri test (64-bit big endian)
-        run: cargo miri test --target powerpc64-unknown-linux-gnu
-      - name: Run cargo miri test (32-bit little endian)
-        run: cargo miri test --target i686-unknown-linux-gnu
-      - name: Run cargo miri test (32-bit big endian)
-        run: cargo miri test --target mips-unknown-linux-gnu
-
-  fuzz:
-    name: Fuzz
-    needs: pre_ci
-    if: needs.pre_ci.outputs.continue
-    runs-on: ubuntu-latest
-    timeout-minutes: 45
-    steps:
-      - uses: actions/checkout@v3
-      - uses: dtolnay/rust-toolchain@nightly
-      - uses: dtolnay/install@cargo-fuzz
-      - run: cargo fuzz check
-
-  outdated:
-    name: Outdated
-    runs-on: ubuntu-latest
-    if: github.event_name != 'pull_request'
-    timeout-minutes: 45
-    steps:
-      - uses: actions/checkout@v3
-      - uses: dtolnay/install@cargo-outdated
-      - run: cargo outdated --workspace --exit-code 1
-      - run: cargo outdated --manifest-path fuzz/Cargo.toml --exit-code 1
+      - run: pnpm install
+      - run: pnpm test

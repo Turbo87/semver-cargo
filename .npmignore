@@ -4,6 +4,7 @@
 .idea/
 .release-it.js
 jest.config.js
+pnpm-lock.yaml
 src/
 tests/
 

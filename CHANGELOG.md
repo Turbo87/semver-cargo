@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.1.2 (2023-02-11)
+
+- CI: Add missing `--no-git-checks` to `pnpm publish` call
+
+
 ## v0.1.1 (2023-02-11)
 
 - Fix release script

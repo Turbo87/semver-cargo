@@ -129,6 +129,10 @@ export default class Version {
     return compareBuild(this.build, other.build);
   }
 
+  eq(other: Version): boolean {
+    return this.compare(other) === 0;
+  }
+
   lt(other: Version): boolean {
     return this.compare(other) < 0;
   }

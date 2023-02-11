@@ -96,67 +96,58 @@ test('display', () => {
   expect(version('1.2.3-alpha1+42').toString()).toBe('1.2.3-alpha1+42');
 });
 
-// test('lt', () => {
-//     assert!(version("0.0.0") < version("1.2.3-alpha2"));
-//     assert!(version("1.0.0") < version("1.2.3-alpha2"));
-//     assert!(version("1.2.0") < version("1.2.3-alpha2"));
-//     assert!(version("1.2.3-alpha1") < version("1.2.3"));
-//     assert!(version("1.2.3-alpha1") < version("1.2.3-alpha2"));
-//     assert!(!(version("1.2.3-alpha2") < version("1.2.3-alpha2")));
-//     assert!(version("1.2.3+23") < version("1.2.3+42"));
-// });
-//
-// test('le', () => {
-//     assert!(version("0.0.0") <= version("1.2.3-alpha2"));
-//     assert!(version("1.0.0") <= version("1.2.3-alpha2"));
-//     assert!(version("1.2.0") <= version("1.2.3-alpha2"));
-//     assert!(version("1.2.3-alpha1") <= version("1.2.3-alpha2"));
-//     assert!(version("1.2.3-alpha2") <= version("1.2.3-alpha2"));
-//     assert!(version("1.2.3+23") <= version("1.2.3+42"));
-// });
-//
-// test('gt', () => {
-//     assert!(version("1.2.3-alpha2") > version("0.0.0"));
-//     assert!(version("1.2.3-alpha2") > version("1.0.0"));
-//     assert!(version("1.2.3-alpha2") > version("1.2.0"));
-//     assert!(version("1.2.3-alpha2") > version("1.2.3-alpha1"));
-//     assert!(version("1.2.3") > version("1.2.3-alpha2"));
-//     assert!(!(version("1.2.3-alpha2") > version("1.2.3-alpha2")));
-//     assert!(!(version("1.2.3+23") > version("1.2.3+42")));
-// });
-//
-// test('ge', () => {
-//     assert!(version("1.2.3-alpha2") >= version("0.0.0"));
-//     assert!(version("1.2.3-alpha2") >= version("1.0.0"));
-//     assert!(version("1.2.3-alpha2") >= version("1.2.0"));
-//     assert!(version("1.2.3-alpha2") >= version("1.2.3-alpha1"));
-//     assert!(version("1.2.3-alpha2") >= version("1.2.3-alpha2"));
-//     assert!(!(version("1.2.3+23") >= version("1.2.3+42")));
-// });
+test('lt', () => {
+  expect(version('0.0.0').lt(version('1.2.3-alpha2'))).toBe(true);
+  expect(version('1.0.0').lt(version('1.2.3-alpha2'))).toBe(true);
+  expect(version('1.2.0').lt(version('1.2.3-alpha2'))).toBe(true);
+  expect(version('1.2.3-alpha1').lt(version('1.2.3'))).toBe(true);
+  expect(version('1.2.3-alpha1').lt(version('1.2.3-alpha2'))).toBe(true);
+  expect(version('1.2.3-alpha2').lt(version('1.2.3-alpha2'))).toBe(false);
+  expect(version('1.2.3+23').lt(version('1.2.3+42'))).toBe(true);
+});
 
-// test('spec_order', () => {
-//     let vs = [
-//         "1.0.0-alpha",
-//         "1.0.0-alpha.1",
-//         "1.0.0-alpha.beta",
-//         "1.0.0-beta",
-//         "1.0.0-beta.2",
-//         "1.0.0-beta.11",
-//         "1.0.0-rc.1",
-//         "1.0.0",
-//     ];
-//     let mut i = 1;
-//     while i < vs.len() {
-//         let a = version(vs[i - 1]);
-//         let b = version(vs[i]);
-//         assert!(a < b, "nope {:?} < {:?}", a, b);
-//         i += 1;
-//     }
-// });
+test('lte', () => {
+  expect(version('0.0.0').lte(version('1.2.3-alpha2'))).toBe(true);
+  expect(version('1.0.0').lte(version('1.2.3-alpha2'))).toBe(true);
+  expect(version('1.2.0').lte(version('1.2.3-alpha2'))).toBe(true);
+  expect(version('1.2.3-alpha1').lte(version('1.2.3-alpha2'))).toBe(true);
+  expect(version('1.2.3-alpha2').lte(version('1.2.3-alpha2'))).toBe(true);
+  expect(version('1.2.3+23').lte(version('1.2.3+42'))).toBe(true);
+});
 
-// test('align', () => {
-//     let version = version("1.2.3-rc1");
-//     assert_eq!("1.2.3-rc1           ", format!("{:20}", version));
-//     assert_eq!("*****1.2.3-rc1******", format!("{:*^20}", version));
-//     assert_eq!("           1.2.3-rc1", format!("{:>20}", version));
-// });
+test('gt', () => {
+  expect(version('1.2.3-alpha2').gt(version('0.0.0'))).toBe(true);
+  expect(version('1.2.3-alpha2').gt(version('1.0.0'))).toBe(true);
+  expect(version('1.2.3-alpha2').gt(version('1.2.0'))).toBe(true);
+  expect(version('1.2.3-alpha2').gt(version('1.2.3-alpha1'))).toBe(true);
+  expect(version('1.2.3').gt(version('1.2.3-alpha2'))).toBe(true);
+  expect(version('1.2.3-alpha2').gt(version('1.2.3-alpha2'))).toBe(false);
+  expect(version('1.2.3+23').gt(version('1.2.3+42'))).toBe(false);
+});
+
+test('gte', () => {
+  expect(version('1.2.3-alpha2').gte(version('0.0.0'))).toBe(true);
+  expect(version('1.2.3-alpha2').gte(version('1.0.0'))).toBe(true);
+  expect(version('1.2.3-alpha2').gte(version('1.2.0'))).toBe(true);
+  expect(version('1.2.3-alpha2').gte(version('1.2.3-alpha1'))).toBe(true);
+  expect(version('1.2.3-alpha2').gte(version('1.2.3-alpha2'))).toBe(true);
+  expect(version('1.2.3+23').gte(version('1.2.3+42'))).toBe(false);
+});
+
+test('spec_order', () => {
+  const vs = [
+    '1.0.0-alpha',
+    '1.0.0-alpha.1',
+    '1.0.0-alpha.beta',
+    '1.0.0-beta',
+    '1.0.0-beta.2',
+    '1.0.0-beta.11',
+    '1.0.0-rc.1',
+    '1.0.0',
+  ];
+  for (let i = 1; i < vs.length; i++) {
+    const a = version(vs[i - 1]);
+    const b = version(vs[i]);
+    expect(a.lt(b)).toBe(true);
+  }
+});

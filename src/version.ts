@@ -1,4 +1,5 @@
 import { parse_version } from './parse';
+import { compareBuild, comparePre } from './order';
 
 /**
  * **SemVer version** as defined by <https://semver.org>.
@@ -111,4 +112,37 @@ export default class Version {
     }
     return output;
   }
+
+  compare(other: Version): number {
+    if (this.major > other.major) return 1;
+    if (this.major < other.major) return -1;
+
+    if (this.minor > other.minor) return 1;
+    if (this.minor < other.minor) return -1;
+
+    if (this.patch > other.patch) return 1;
+    if (this.patch < other.patch) return -1;
+
+    const preCompare = comparePre(this.pre, other.pre);
+    if (preCompare !== 0) return preCompare;
+
+    return compareBuild(this.build, other.build);
+  }
+
+  lt(other: Version): boolean {
+    return this.compare(other) < 0;
+  }
+
+  lte(other: Version): boolean {
+    return this.compare(other) <= 0;
+  }
+
+  gt(other: Version): boolean {
+    return this.compare(other) > 0;
+  }
+
+  gte(other: Version): boolean {
+    return this.compare(other) >= 0;
+  }
 }
+//

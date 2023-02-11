@@ -5,6 +5,10 @@ on:
     tags:
       - '*'
 
+env:
+  # renovate: datasource=npm depName=pnpm
+  PNPM_VERSION: 7.27.0
+
 jobs:
   release:
     name: Release
@@ -12,11 +16,19 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3.3.0
+
+      - uses: pnpm/action-setup@v2.2.4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
       - uses: actions/setup-node@v3.6.0
         with:
-          node-version: 18.x
-          registry-url: 'https://registry.npmjs.org'
+          node-version: 14.x
+          cache: pnpm
 
-      - run: npm publish
+      - run: pnpm install
+      - run: pnpm build
+
+      - run: pnpm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

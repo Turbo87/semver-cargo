@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.1.5 (2023-02-11)
+
+- npmignore: Add `pnpm-lock.yaml` file
+
+
 ## v0.1.4 (2023-02-11)
 
 - CI: Add missing `registry-url` option to deploy script

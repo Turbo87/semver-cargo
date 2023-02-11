@@ -1,6 +1,6 @@
 {
   "name": "semver-cargo",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Parser and evaluator for Cargo's flavor of Semantic Versioning",
   "repository": "https://github.com/Turbo87/semver-cargo",
   "source": "src/lib.ts",

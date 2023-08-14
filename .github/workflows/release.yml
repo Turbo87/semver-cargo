@@ -21,7 +21,7 @@ jobs:
         with:
           version: ${{ env.PNPM_VERSION }}
 
-      - uses: actions/setup-node@v3.7.0
+      - uses: actions/setup-node@v3.8.0
         with:
           registry-url: 'https://registry.npmjs.org'
           node-version: 14.x

@@ -27,8 +27,8 @@ importers:
         specifier: 0.2.36
         version: 0.2.36(@swc/core@1.4.15(@swc/helpers@0.5.1))
       '@types/jest':
-        specifier: 29.5.1
-        version: 29.5.1
+        specifier: 29.5.12
+        version: 29.5.12
       '@typescript-eslint/eslint-plugin':
         specifier: 5.59.7
         version: 5.59.7(@typescript-eslint/parser@5.59.7(eslint@8.41.0)(typescript@4.9.5))(eslint@8.41.0)(typescript@4.9.5)
@@ -920,8 +920,8 @@ packages:
   '@types/istanbul-reports@3.0.1':
     resolution: {integrity: sha512-c3mAZEuK0lvBp8tmuL74XRKn1+y2dcwOUpH7x4WrF6gk1GIgiluDRgMYQtw2OFcBvAJWlt6ASU3tSqxp0Uu0Aw==}
 
-  '@types/jest@29.5.1':
-    resolution: {integrity: sha512-tEuVcHrpaixS36w7hpsfLBLpjtMRJUE09/MHXn923LOVojDwyC14cWcfc0rDs0VEfUyYmt/+iX1kxxp+gZMcaQ==}
+  '@types/jest@29.5.12':
+    resolution: {integrity: sha512-eDC8bTvT/QhYdxJAulQikueigY5AsdBRH2yDKW3yveW7svY3+DzN84/2NUgkw10RTiJbWqZrTtoGVdYlvFJdLw==}
 
   '@types/json-schema@7.0.11':
     resolution: {integrity: sha512-wOuvG1SN4Us4rez+tylwwwCV1psiNVOkJeM3AUWUNWg/jDQY2+HE/444y5gc+jBmRqASOm2Oeh5c1axHobwRKQ==}
@@ -3996,7 +3996,7 @@ snapshots:
   '@jest/environment@29.5.0':
     dependencies:
       '@jest/fake-timers': 29.5.0
-      '@jest/types': 29.5.0
+      '@jest/types': 29.6.3
       '@types/node': 20.2.3
       jest-mock: 29.5.0
 
@@ -4013,7 +4013,7 @@ snapshots:
 
   '@jest/fake-timers@29.5.0':
     dependencies:
-      '@jest/types': 29.5.0
+      '@jest/types': 29.6.3
       '@sinonjs/fake-timers': 10.2.0
       '@types/node': 20.2.3
       jest-message-util: 29.5.0
@@ -4024,7 +4024,7 @@ snapshots:
     dependencies:
       '@jest/environment': 29.5.0
       '@jest/expect': 29.5.0
-      '@jest/types': 29.5.0
+      '@jest/types': 29.6.3
       jest-mock: 29.5.0
     transitivePeerDependencies:
       - supports-color
@@ -4983,7 +4983,7 @@ snapshots:
     dependencies:
       '@types/istanbul-lib-report': 3.0.0
 
-  '@types/jest@29.5.1':
+  '@types/jest@29.5.12':
     dependencies:
       expect: 29.5.0
       pretty-format: 29.5.0
@@ -6420,7 +6420,7 @@ snapshots:
       '@jest/environment': 29.5.0
       '@jest/expect': 29.5.0
       '@jest/test-result': 29.5.0
-      '@jest/types': 29.5.0
+      '@jest/types': 29.6.3
       '@types/node': 20.2.3
       chalk: 4.1.2
       co: 4.6.0
@@ -6501,7 +6501,7 @@ snapshots:
 
   jest-each@29.5.0:
     dependencies:
-      '@jest/types': 29.5.0
+      '@jest/types': 29.6.3
       chalk: 4.1.2
       jest-get-type: 29.4.3
       jest-util: 29.5.0
@@ -6511,7 +6511,7 @@ snapshots:
     dependencies:
       '@jest/environment': 29.5.0
       '@jest/fake-timers': 29.5.0
-      '@jest/types': 29.5.0
+      '@jest/types': 29.6.3
       '@types/node': 20.2.3
       jest-mock: 29.5.0
       jest-util: 29.5.0
@@ -6549,7 +6549,7 @@ snapshots:
   jest-message-util@29.5.0:
     dependencies:
       '@babel/code-frame': 7.21.4
-      '@jest/types': 29.5.0
+      '@jest/types': 29.6.3
       '@types/stack-utils': 2.0.1
       chalk: 4.1.2
       graceful-fs: 4.2.11
@@ -6560,7 +6560,7 @@ snapshots:
 
   jest-mock@29.5.0:
     dependencies:
-      '@jest/types': 29.5.0
+      '@jest/types': 29.6.3
       '@types/node': 20.2.3
       jest-util: 29.5.0
 
@@ -6672,7 +6672,7 @@ snapshots:
 
   jest-util@29.5.0:
     dependencies:
-      '@jest/types': 29.5.0
+      '@jest/types': 29.6.3
       '@types/node': 20.2.3
       chalk: 4.1.2
       ci-info: 3.8.0
@@ -7472,7 +7472,7 @@ snapshots:
 
   pretty-format@29.5.0:
     dependencies:
-      '@jest/schemas': 29.4.3
+      '@jest/schemas': 29.6.3
       ansi-styles: 5.2.0
       react-is: 18.2.0
 

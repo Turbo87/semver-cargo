@@ -28,7 +28,7 @@
     "@parcel/transformer-typescript-types": "2.15.4",
     "@release-it-plugins/lerna-changelog": "5.0.0",
     "@swc/core": "1.12.11",
-    "@swc/jest": "0.2.38",
+    "@swc/jest": "0.2.39",
     "@types/jest": "29.5.14",
     "@typescript-eslint/eslint-plugin": "5.62.0",
     "@typescript-eslint/parser": "5.62.0",

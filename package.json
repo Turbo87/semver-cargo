@@ -35,7 +35,7 @@
     "eslint": "8.57.1",
     "eslint-config-prettier": "10.1.8",
     "eslint-plugin-prettier": "5.5.6",
-    "jest": "30.4.0",
+    "jest": "30.4.2",
     "parcel": "2.16.4",
     "prettier": "2.8.8",
     "release-it": "17.11.0",

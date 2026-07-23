@@ -7,7 +7,7 @@ on:
 
 env:
   # renovate: datasource=npm depName=pnpm
-  PNPM_VERSION: 7.33.7
+  PNPM_VERSION: 11.17.0
 
 jobs:
   release:
